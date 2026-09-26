@@ -1,0 +1,409 @@
+{
+  "version": 1,
+  "categories": [
+    {
+      "synset": "dog.n.01",
+      "display": {
+        "spa": "perro",
+        "fra": "chien"
+      },
+      "exclude": [
+        "fox.n.01",
+        "head.n.02"
+      ]
+    },
+    {
+      "synset": "cat.n.01",
+      "display": {
+        "spa": "gato",
+        "fra": "chat"
+      }
+    },
+    {
+      "synset": "horse.n.01",
+      "display": {
+        "spa": "caballo",
+        "fra": "cheval"
+      }
+    },
+    {
+      "synset": "cow.n.01",
+      "display": {
+        "spa": "vaca",
+        "fra": "vache"
+      }
+    },
+    {
+      "synset": "pig.n.01",
+      "display": {
+        "eng": "pig",
+        "spa": "cerdo",
+        "fra": "cochon"
+      }
+    },
+    {
+      "synset": "bird.n.01",
+      "display": {
+        "spa": "pájaro",
+        "fra": "oiseau"
+      }
+    },
+    {
+      "synset": "snake.n.01",
+      "display": {
+        "spa": "serpiente",
+        "fra": "serpent"
+      }
+    },
+    {
+      "synset": "bear.n.01",
+      "display": {
+        "spa": "oso",
+        "fra": "ours"
+      }
+    },
+    {
+      "synset": "lion.n.01",
+      "display": {
+        "spa": "león",
+        "fra": "lion"
+      }
+    },
+    {
+      "synset": "monkey.n.01",
+      "display": {
+        "spa": "mono",
+        "fra": "singe"
+      }
+    },
+    {
+      "synset": "bee.n.01",
+      "display": {
+        "spa": "abeja",
+        "fra": "abeille"
+      }
+    },
+    {
+      "synset": "whale.n.02",
+      "display": {
+        "spa": "ballena",
+        "fra": "baleine"
+      }
+    },
+    {
+      "synset": "frog.n.01",
+      "display": {
+        "spa": "rana",
+        "fra": "grenouille"
+      }
+    },
+    {
+      "synset": "shark.n.01",
+      "display": {
+        "spa": "tiburón",
+        "fra": "requin"
+      }
+    },
+    {
+      "synset": "tree.n.01",
+      "display": {
+        "spa": "árbol",
+        "fra": "arbre"
+      }
+    },
+    {
+      "synset": "flower.n.01",
+      "display": {
+        "spa": "flor",
+        "fra": "fleur"
+      }
+    },
+    {
+      "synset": "apple.n.01",
+      "display": {
+        "spa": "manzana",
+        "fra": "pomme"
+      }
+    },
+    {
+      "synset": "banana.n.02",
+      "display": {
+        "spa": "plátano",
+        "fra": "banane"
+      }
+    },
+    {
+      "synset": "orange.n.01",
+      "display": {
+        "spa": "naranja",
+        "fra": "orange"
+      }
+    },
+    {
+      "synset": "bread.n.01",
+      "display": {
+        "spa": "pan",
+        "fra": "pain"
+      }
+    },
+    {
+      "synset": "cheese.n.01",
+      "display": {
+        "spa": "queso",
+        "fra": "fromage"
+      }
+    },
+    {
+      "synset": "wine.n.01",
+      "display": {
+        "spa": "vino",
+        "fra": "vin"
+      }
+    },
+    {
+      "synset": "beer.n.01",
+      "display": {
+        "spa": "cerveza",
+        "fra": "bière"
+      }
+    },
+    {
+      "synset": "coffee.n.01",
+      "display": {
+        "spa": "café",
+        "fra": "café"
+      }
+    },
+    {
+      "synset": "soup.n.01",
+      "display": {
+        "spa": "sopa",
+        "fra": "soupe"
+      }
+    },
+    {
+      "synset": "cake.n.03",
+      "display": {
+        "spa": "pastel",
+        "fra": "gâteau"
+      }
+    },
+    {
+      "synset": "car.n.01",
+      "display": {
+        "spa": "carro",
+        "fra": "voiture"
+      }
+    },
+    {
+      "synset": "bicycle.n.01",
+      "display": {
+        "spa": "bicicleta",
+        "fra": "vélo"
+      }
+    },
+    {
+      "synset": "boat.n.01",
+      "display": {
+        "spa": "barco",
+        "fra": "bateau"
+      }
+    },
+    {
+      "synset": "airplane.n.01",
+      "display": {
+        "spa": "avión",
+        "fra": "avion"
+      }
+    },
+    {
+      "synset": "train.n.01",
+      "display": {
+        "spa": "tren",
+        "fra": "train"
+      }
+    },
+    {
+      "synset": "house.n.01",
+      "display": {
+        "spa": "casa",
+        "fra": "maison"
+      }
+    },
+    {
+      "synset": "church.n.02",
+      "display": {
+        "spa": "iglesia",
+        "fra": "église"
+      }
+    },
+    {
+      "synset": "hospital.n.01",
+      "display": {
+        "spa": "hospital",
+        "fra": "hôpital"
+      }
+    },
+    {
+      "synset": "chair.n.01",
+      "display": {
+        "spa": "silla",
+        "fra": "chaise"
+      }
+    },
+    {
+      "synset": "table.n.02",
+      "display": {
+        "spa": "mesa",
+        "fra": "table"
+      }
+    },
+    {
+      "synset": "bed.n.01",
+      "display": {
+        "spa": "cama",
+        "fra": "lit"
+      }
+    },
+    {
+      "synset": "knife.n.01",
+      "display": {
+        "spa": "cuchillo",
+        "fra": "couteau"
+      }
+    },
+    {
+      "synset": "hat.n.01",
+      "display": {
+        "spa": "sombrero",
+        "fra": "chapeau"
+      }
+    },
+    {
+      "synset": "shoe.n.01",
+      "display": {
+        "spa": "zapato",
+        "fra": "chaussure"
+      }
+    },
+    {
+      "synset": "shirt.n.01",
+      "display": {
+        "spa": "camisa",
+        "fra": "chemise"
+      }
+    },
+    {
+      "synset": "guitar.n.01",
+      "display": {
+        "spa": "guitarra",
+        "fra": "guitare"
+      }
+    },
+    {
+      "synset": "piano.n.01",
+      "display": {
+        "spa": "piano",
+        "fra": "piano"
+      }
+    },
+    {
+      "synset": "drum.n.01",
+      "display": {
+        "spa": "tambor",
+        "fra": "tambour"
+      }
+    },
+    {
+      "synset": "doctor.n.01",
+      "display": {
+        "spa": "médico",
+        "fra": "médecin"
+      }
+    },
+    {
+      "synset": "teacher.n.01",
+      "display": {
+        "spa": "maestro",
+        "fra": "professeur"
+      }
+    },
+    {
+      "synset": "soldier.n.01",
+      "display": {
+        "spa": "soldado",
+        "fra": "soldat"
+      }
+    },
+    {
+      "synset": "writer.n.01",
+      "display": {
+        "spa": "escritor",
+        "fra": "écrivain"
+      }
+    },
+    {
+      "synset": "singer.n.01",
+      "display": {
+        "spa": "cantante",
+        "fra": "chanteur"
+      }
+    },
+    {
+      "synset": "city.n.01",
+      "display": {
+        "spa": "ciudad",
+        "fra": "ville"
+      }
+    },
+    {
+      "synset": "mountain.n.01",
+      "display": {
+        "spa": "montaña",
+        "fra": "montagne"
+      }
+    },
+    {
+      "synset": "book.n.01",
+      "display": {
+        "spa": "libro",
+        "fra": "livre"
+      }
+    },
+    {
+      "synset": "computer.n.01",
+      "display": {
+        "spa": "computadora",
+        "fra": "ordinateur"
+      }
+    },
+    {
+      "synset": "clock.n.01",
+      "display": {
+        "spa": "reloj",
+        "fra": "horloge"
+      }
+    },
+    {
+      "synset": "hammer.n.02",
+      "display": {
+        "spa": "martillo",
+        "fra": "marteau"
+      }
+    },
+    {
+      "synset": "lamp.n.01",
+      "display": {
+        "spa": "lámpara",
+        "fra": "lampe"
+      }
+    },
+    {
+      "synset": "sport.n.01",
+      "display": {
+        "spa": "deporte",
+        "fra": "sport"
+      }
+    }
+  ]
+}

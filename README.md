@@ -47,7 +47,7 @@ Cada categoría es un **synset** (por ejemplo `dog.n.01`), no una palabra suelta
 
 | Pista | Relación preferida | Respaldo si no hay candidato válido | Nivel |
 |---|---|---|---|
-| 1 | Hiperónimo a 2 niveles (`hypernyms()` del hiperónimo) | hiperónimo, co-hipónimo | Muy general |
+| 1 | Hiperónimo lejano, a 2–5 niveles (búsqueda en anchura sobre `hypernyms()`) | hiperónimo, co-hipónimo | Muy general |
 | 2 | Hiperónimo directo (`hypernyms()`, `instance_hypernyms()`) | co-hipónimo, hipónimo | General |
 | 3 | Hipónimo (`hyponyms()`, `instance_hyponyms()`) | co-hipónimo | Específica |
 | 4 | Hipónimo | co-hipónimo, sinónimo | Específica |
@@ -55,11 +55,13 @@ Cada categoría es un **synset** (por ejemplo `dog.n.01`), no una palabra suelta
 
 Los co-hipónimos son los "hermanos": otros hipónimos del mismo hiperónimo. Solo se usan como respaldo, y la CLI indica siempre de qué relación proviene cada pista.
 
+**Elección del hiperónimo lejano (pista 1).** Entre los ancestros a 2–5 niveles se prefiere, en este orden: una palabra conocida (frecuencia mayor que 0 en SemCor) sobre un tecnicismo, un nombre común sobre uno propio, el ancestro más cercano y, por último, el más frecuente. Así, para `horse.n.01` la pista 1 es *mammal* y no *perissodactyl*. Con este criterio, las pistas 1 con palabras raras bajaron de 21 a 4 de 57 categorías.
+
 Ejemplo con `dog.n.01` en inglés:
 
 | # | Pista | Relación |
 |---|---|---|
-| 1 | animal | hiperónimo (2 niveles) |
+| 1 | animal | hiperónimo lejano |
 | 2 | canine | hiperónimo |
 | 3 | puppy | hipónimo |
 | 4 | cur | hipónimo |
@@ -68,8 +70,10 @@ Ejemplo con `dog.n.01` en inglés:
 ### Filtros de calidad
 
 - **Sin fugas de la respuesta.** Se descarta cualquier pista que comparta raíz con alguna respuesta válida (*hunting dog* → *dog*) o que contenga la respuesta como subcadena (*hotdog*). Ver `matcher.leaks_answer`.
-- **Sin pistas redundantes.** No se repiten synsets ni raíces entre las pistas de una misma ronda.
+- **Sin pistas redundantes.** No se repiten synsets ni raíces entre las pistas de una misma ronda. La única excepción es que el hiperónimo directo puede especializar a la pista 1 (*plant* → *woody plant*, *vehicle* → *motor vehicle*), porque esa es justamente la progresión de general a específico.
 - **Preferencia por palabras conocidas.** Los candidatos se ordenan por frecuencia en SemCor (`lemma.count()`). Los nombres propios, como las variedades de manzana, y los lemas que OMW dejó sin traducir solo se usan si no hay otra opción.
+- **Detección de lemas sin traducir.** Una forma en español o francés se considera no traducida si coincide con un lema inglés del synset y además aparece en un solo synset del idioma (*craniate*, *diapsid*). Los cognados reales, como *animal*, *alcohol* o *piano*, aparecen en varios synsets y no se penalizan.
+- **Formas en singular.** Si un synset trae variantes con la misma raíz (*animal*/*animales*), se usa la más corta.
 - **Hiperónimos demasiado abstractos excluidos.** Por ejemplo `entity`, `object` o `whole` (`config.GENERIC_SYNSETS`).
 - **Curaduría manual.** Cada categoría del banco puede definir `exclude`, una lista de synsets que se vetan porque generan ruido.
 - **Categorías no jugables.** Si una categoría no alcanza 5 pistas válidas en el idioma elegido, se omite automáticamente y se registra un aviso.

@@ -20,7 +20,7 @@ class Lang(str, Enum):
 class Relation(str, Enum):
     """Relación semántica de WordNet de la que proviene una pista."""
 
-    HYPERNYM_L2 = "hiperónimo (2 niveles)"
+    HYPERNYM_FAR = "hiperónimo lejano"
     HYPERNYM = "hiperónimo"
     SIBLING = "co-hipónimo"
     HYPONYM = "hipónimo"

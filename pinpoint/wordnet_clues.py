@@ -1,7 +1,8 @@
 """Generación de pistas a partir de relaciones de WordNet.
 
 Relaciones explotadas (ver config.CLUE_PLAN para el orden):
-    - Hiperónimos a 2 niveles y directos   -> pistas generales (1-2)
+    - Hiperónimo lejano (2 a 5 niveles)    -> pista más general (1)
+    - Hiperónimo directo                   -> pista general (2)
     - Hipónimos (por frecuencia de uso)    -> pistas específicas (3-4)
     - Sinónimos del mismo synset           -> pista más reveladora (5)
     - Co-hipónimos (hermanos)              -> respaldo cuando falta alguna relación
@@ -11,9 +12,16 @@ from __future__ import annotations
 from collections.abc import Iterable
 from functools import lru_cache
 
+from nltk.corpus import wordnet as wn
 from nltk.corpus.reader.wordnet import Synset
 
-from pinpoint.config import CLUE_PLAN, GENERIC_SYNSETS, NUM_CLUES
+from pinpoint.config import (
+    CLUE_PLAN,
+    FAR_HYPERNYM_MAX_LEVEL,
+    FAR_HYPERNYM_MIN_LEVEL,
+    GENERIC_SYNSETS,
+    NUM_CLUES,
+)
 from pinpoint.language import get_synset, has_lemmas, lemmas_in, surface_forms
 from pinpoint.matcher import leaks_answer
 from pinpoint.models import Clue, InsufficientCluesError, Lang, RawClue, Relation
@@ -55,11 +63,47 @@ def _by_popularity(synsets: list[Synset]) -> list[Synset]:
 
 
 @lru_cache(maxsize=None)
+def far_hypernyms(synset_id: str) -> tuple[tuple[int, str], ...]:
+    """Ancestros entre FAR_HYPERNYM_MIN_LEVEL y FAR_HYPERNYM_MAX_LEVEL niveles, como (nivel, synset).
+
+    Orden de preferencia para la pista 1:
+        1. Palabras conocidas (frecuencia > 0 en SemCor) antes que tecnicismos
+           ('mammal' antes que 'perissodactyl').
+        2. Nombres comunes antes que propios.
+        3. El más cercano: lo bastante general para ser difícil sin ser inútil.
+        4. Más frecuente; el nombre desempata (determinismo).
+    Cada ancestro aparece una sola vez, en su nivel más cercano (búsqueda en anchura).
+    """
+    target = get_synset(synset_id)
+    seen = {target.name()}
+    frontier = [target]
+    found: list[tuple[int, Synset]] = []
+    for level in range(1, FAR_HYPERNYM_MAX_LEVEL + 1):
+        next_frontier: list[Synset] = []
+        for synset in frontier:
+            for parent in _hypernyms(synset):
+                if parent.name() not in seen:
+                    seen.add(parent.name())
+                    next_frontier.append(parent)
+        if level >= FAR_HYPERNYM_MIN_LEVEL:
+            found.extend((level, s) for s in next_frontier if s.name() not in GENERIC_SYNSETS)
+        frontier = next_frontier
+
+    found.sort(key=lambda item: (
+        _popularity(item[1]) == 0,
+        _is_proper_noun(item[1]),
+        item[0],
+        -_popularity(item[1]),
+        item[1].name(),
+    ))
+    return tuple((level, s.name()) for level, s in found)
+
+
+@lru_cache(maxsize=None)
 def candidate_pools(synset_id: str) -> dict[Relation, tuple[RawClue, ...]]:
     """Candidatos por relación, independientes del idioma y ordenados por preferencia."""
     target = get_synset(synset_id)
     parents = _by_popularity(_hypernyms(target))
-    grandparents = _by_popularity([g for p in parents for g in _hypernyms(p)])
     children = _by_popularity(_unique(_hyponyms(target), {synset_id}))
     grandchildren = _by_popularity(_unique((g for c in children for g in _hyponyms(c)), {synset_id}))
     siblings = _by_popularity(_unique((s for p in parents for s in _hyponyms(p)), {synset_id}))
@@ -67,9 +111,10 @@ def candidate_pools(synset_id: str) -> dict[Relation, tuple[RawClue, ...]]:
     def raw(synsets: Iterable[Synset], relation: Relation) -> tuple[RawClue, ...]:
         return tuple(RawClue(s.name(), relation) for s in synsets)
 
-    parent_names = {p.name() for p in parents}
     return {
-        Relation.HYPERNYM_L2: raw(_unique(grandparents, parent_names | {synset_id}), Relation.HYPERNYM_L2),
+        Relation.HYPERNYM_FAR: tuple(
+            RawClue(name, Relation.HYPERNYM_FAR) for _, name in far_hypernyms(synset_id)
+        ),
         Relation.HYPERNYM: raw(_unique(parents, {synset_id}), Relation.HYPERNYM),
         # Hipónimos directos primero; los de segundo nivel amplían el banco de candidatos.
         Relation.HYPONYM: raw(children, Relation.HYPONYM)
@@ -77,6 +122,22 @@ def candidate_pools(synset_id: str) -> dict[Relation, tuple[RawClue, ...]]:
         Relation.SIBLING: raw(siblings, Relation.SIBLING),
         Relation.SYNONYM: (RawClue(synset_id, Relation.SYNONYM),),
     }
+
+
+@lru_cache(maxsize=4096)
+def _looks_untranslated(form: str, synset_id: str, lang: Lang) -> bool:
+    """Heurística para lemas que OMW dejó en inglés.
+
+    La forma coincide con un lema inglés del synset y además solo existe en un
+    synset del idioma. Los cognados reales ('animal', 'alcohol', 'piano') aparecen
+    en varios synsets; los lemas sin traducir ('craniate', 'diapsid') en uno solo.
+    """
+    if lang is Lang.EN:
+        return False
+    english = {l.lower() for l in lemmas_in(synset_id, Lang.EN)}
+    if form.lower() not in english:
+        return False
+    return len(wn.synsets(form.replace(" ", "_"), lang=lang.value)) <= 1
 
 
 class _ClueSelector:
@@ -90,10 +151,22 @@ class _ClueSelector:
         self.pools = candidate_pools(target)
         self.used_synsets: set[str] = {target, *exclude}
         self.used_stems: set[str] = set()
+        self.far_stems: frozenset[str] = frozenset()
 
     def _acceptable(self, text: str, relation: Relation) -> bool:
         stems = normalize(text, self.lang)
-        if not stems or stems & self.used_stems:  # repetida o muy parecida a otra pista
+        if not stems:
+            return False
+        overlap = stems & self.used_stems
+        # El hiperónimo directo puede especializar a la pista 1 ('plant' -> 'woody plant'):
+        # comparte raíces con ella pero agrega información. Cualquier otro solapamiento
+        # indica una pista repetida o demasiado parecida.
+        extends_far = (
+            relation is Relation.HYPERNYM
+            and overlap <= self.far_stems
+            and stems > self.far_stems
+        )
+        if overlap and not extends_far:
             return False
         # Un sinónimo es, por definición, una respuesta válida: se compara contra las demás.
         answers = (
@@ -103,14 +176,25 @@ class _ClueSelector:
         )
         return not leaks_answer(text, answers, self.lang, substring_answers=[self.display])
 
-    def _untranslated(self, text: str, synset_id: str) -> bool:
-        """OMW a veces conserva el lema en inglés ('ice bear' en español)."""
-        if self.lang is Lang.EN:
-            return False
-        return text.lower() in {l.lower() for l in lemmas_in(synset_id, Lang.EN)}
+    def _preferred_forms(self, raw: RawClue) -> list[str]:
+        """Formas de la pista en orden de preferencia.
+
+        - Descarta variantes con la misma raíz y se queda con la más corta
+          ('animal' en vez de 'animales', 'perro' en vez de 'perros').
+        - En idiomas distintos al inglés, pone al final las formas que parecen
+          no traducidas ('vertebrado' antes que 'craniate'); ver _looks_untranslated.
+        """
+        forms = surface_forms(raw, self.target, self.lang, self.display)
+        by_stem: dict[frozenset[str], str] = {}
+        for form in forms:
+            stem = normalize(form, self.lang)
+            if stem not in by_stem or len(form) < len(by_stem[stem]):
+                by_stem[stem] = form
+        kept = [f for f in forms if f in by_stem.values()]
+        return sorted(kept, key=lambda f: _looks_untranslated(f, raw.synset_id, self.lang))
 
     def pick(self, order: int, relations: tuple[Relation, ...]) -> Clue | None:
-        # 1.ª pasada: solo nombres comunes. 2.ª pasada: se permiten nombres propios/siglas.
+        # 1.ª pasada: sin nombres propios ni lemas sin traducir. 2.ª pasada: se permiten.
         for allow_proper in (False, True):
             for relation in relations:
                 clue = self._pick_from(order, relation, allow_proper)
@@ -125,15 +209,18 @@ class _ClueSelector:
                 raw.synset_id in self.used_synsets or not has_lemmas(raw.synset_id, self.lang)
             ):
                 continue
-            for text in surface_forms(raw, self.target, self.lang, self.display):
+            for text in self._preferred_forms(raw):
                 # 1.ª pasada: se evitan nombres propios y palabras que OMW dejó sin traducir.
                 # Los sinónimos pueden ser nombres científicos ("Canis familiaris"): se permiten siempre.
                 if not allow_proper and not is_synonym and (
-                    text[:1].isupper() or self._untranslated(text, raw.synset_id)
+                    text[:1].isupper() or _looks_untranslated(text, raw.synset_id, self.lang)
                 ):
                     continue
                 if self._acceptable(text, relation):
-                    self.used_stems |= normalize(text, self.lang)
+                    stems = normalize(text, self.lang)
+                    self.used_stems |= stems
+                    if relation is Relation.HYPERNYM_FAR:
+                        self.far_stems = stems
                     if not is_synonym:
                         self.used_synsets.add(raw.synset_id)
                     return Clue(order=order, text=text, relation=relation, synset_id=raw.synset_id)

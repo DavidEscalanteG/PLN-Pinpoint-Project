@@ -1,10 +1,4 @@
-"""Interfaz de línea de comandos del juego.
 
-Uso:
-    python cli.py                      # español, 3 rondas
-    python cli.py --lang eng --rounds 5
-    python cli.py --lang spa --seed 42 --show-relations
-"""
 from __future__ import annotations
 
 import argparse
@@ -21,6 +15,7 @@ QUIT_COMMANDS = {":salir", ":q", ":quit"}
 
 
 def parse_args(argv: list[str] | None) -> argparse.Namespace:
+    #Analiza y valida los argumentos de la línea de comandos
     parser = argparse.ArgumentParser(description="Pinpoint WordNet: adivina la categoría con 5 pistas.")
     parser.add_argument("--lang", choices=[l.value for l in Lang], default=Lang.ES.value,
                         help="idioma de pistas y respuestas (eng, spa, fra). Default: spa")
@@ -35,51 +30,78 @@ def parse_args(argv: list[str] | None) -> argparse.Namespace:
     return args
 
 
-def format_clue(clue: Clue, show_relation: bool) -> str:
-    suffix = f"   [{clue.relation.value}]" if show_relation else ""
-    return f"  Pista {clue.order}/{NUM_CLUES}: {clue.text.upper()}{suffix}"
+def formato(pista: Clue, relacion: bool) -> str:
+    #Formatea una pista para mostrarla en pantalla, incluyendo su relación segun wordnet
+    sufijo = f"   [{pista.relation.value}]" if relacion else ""
+    return f"  Pista {pista.order}/{NUM_CLUES}: {pista.text.upper()}{sufijo}"
 
 
-def read_answer() -> str:
-    """Pide una respuesta no vacía; lanza EOFError/KeyboardInterrupt si el usuario sale."""
+def pistas_reveladas(sesion: GameSession, relacion: bool) -> None:
+    #Muestra todas las pistas reveladas hasta ahora
+    pistas = sesion.revealed_clues()
+    if len(pistas) <= 1:
+        return
+    print("  Pistas reveladas hasta ahora:")
+    for pista in pistas[:-1]:
+        sufijo = f"   [{pista.relation.value}]" if relacion else ""
+        print(f"    {pista.order}. {pista.text.upper()}{sufijo}")
+
+
+def leer(pistas_restantes: int) -> str:
+    #Solicita al jugador una respuesta hasta recibir un texto no vacío
     while True:
-        text = input("  Tu respuesta > ").strip()
+        text = input(f"  Tu respuesta ({pistas_restantes} pista(s) más disponible(s)) > ").strip()
         if text:
             return text
         print("  Escribe una respuesta, ':pasar' para ver otra pista o ':salir' para terminar.")
 
 
-def play_round(session: GameSession, show_relations: bool) -> bool:
-    """Juega una ronda. Devuelve False si el jugador pidió salir."""
-    print(f"\n=== Ronda {session.rounds_played + 1} de {session.total_rounds} ===")
-    while session.round_active:
-        print(format_clue(session.current_clue(), show_relations))
-        answer = read_answer()
-        command = answer.lower()
-        if command in QUIT_COMMANDS:
+def jugar(sesion: GameSession, relacion: bool) -> bool:
+    #Juega una ronda
+    print(f"\n=== Ronda {sesion.rounds_played + 1} de {sesion.total_rounds} ===")
+    while sesion.round_active:
+        pistas_reveladas(sesion, relacion)
+        partida = sesion.current_clue()
+        print(formato(partida, relacion))
+        pistas_restantes = NUM_CLUES - partida.order
+        texto = leer(pistas_restantes)
+        comando = texto.lower()
+        if comando in QUIT_COMMANDS:
+            print("  Partida interrumpida por el jugador.")
             return False
 
-        result = session.pass_turn() if command in PASS_COMMANDS else session.guess(answer)
-        if result.correct:
-            print(f"  ✔ ¡Correcto! Era '{result.revealed_answer}'. "
-                  f"Pistas usadas: {result.clues_used}. +{result.points} pts")
-        elif result.finished:
-            print(f"  ✘ Sin pistas. La respuesta era: '{result.revealed_answer}'")
+        respuesta = sesion.pass_turn() if comando in PASS_COMMANDS else sesion.guess(texto)
+        if respuesta.correct:
+            print(f"  ✔ ¡CORRECTO! La respuesta era '{respuesta.revealed_answer}'.")
+            print(f"    Pistas usadas: {respuesta.clues_used}/{NUM_CLUES}  →  +{respuesta.points} pts")
+        elif respuesta.finished:
+            print(f"  ✘ Se acabaron las pistas. La respuesta correcta era: '{respuesta.revealed_answer}' (0 pts)")
         else:
-            print("  ✘ Incorrecto.")
+            verbo = "Pista saltada" if comando in PASS_COMMANDS else f"'{texto}' no es correcto"
+            print(f"  ✘ {verbo}. Revelando la siguiente pista...")
 
-    print("  Pistas de la ronda y su relación en WordNet:")
-    for clue in session.round.clues:  # type: ignore[union-attr]
-        print(f"    {clue.order}. {clue.text:<28} {clue.relation.value:<24} ({clue.synset_id})")
+    print("\n  Resumen de la ronda — pistas y su relación en WordNet:")
+    for pista in sesion.round.clues: 
+        print(f"    {pista.order}. {pista.text:<28} {pista.relation.value:<24} ({pista.synset_id})")
     return True
 
 
-def print_summary(session: GameSession) -> None:
-    summary = session.summary
-    played = len(summary.results)
-    print("\n=== Resumen de la partida ===")
-    print(f"  Rondas jugadas: {played}   Acertadas: {summary.rounds_won}")
-    print(f"  Puntaje: {summary.total_points} / {max_points(played)}")
+def resultado(sesion: GameSession) -> None:
+    #Resumen de los resultados de la partida
+    puntos = sesion.summary
+    rondas = len(puntos.results)
+    print("\n" + "=" * 32)
+    print("  RESUMEN DE LA PARTIDA")
+    print("=" * 32)
+    if rondas == 0:
+        print("  No se completó ninguna ronda.")
+        return
+    for i, respuesta in enumerate(puntos.results, start=1):
+        estado = "✔ acertada" if respuesta.correct else "✘ fallada"
+        print(f"  Ronda {i}: {estado}  ({respuesta.clues_used}/{NUM_CLUES} pistas, +{respuesta.points} pts)")
+    print("-" * 32)
+    print(f"  Rondas jugadas: {rondas}   Acertadas: {puntos.rounds_won}")
+    print(f"  Puntaje total: {puntos.total_points} / {max_points(rondas)}")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -89,7 +111,7 @@ def main(argv: list[str] | None = None) -> int:
     lang = Lang(args.lang)
 
     try:
-        session = GameSession(lang, rounds=args.rounds, seed=args.seed)
+        sesion = GameSession(lang, rounds=args.rounds, seed=args.seed)
     except LookupError:
         print("Faltan recursos de NLTK. Ejecuta: python setup_nltk.py")
         return 1
@@ -104,20 +126,25 @@ def main(argv: list[str] | None = None) -> int:
     print("  Comandos: ':pasar' (siguiente pista), ':salir' (terminar).")
 
     try:
-        while not session.is_over:
+        while not sesion.is_over:
             try:
-                session.new_round()
+                sesion.new_round()
             except CategoryBankError as exc:
                 print(f"\n{exc}")
                 break
-            if not play_round(session, args.show_relations):
+            if not jugar(sesion, args.show_relations):
                 break
     except (KeyboardInterrupt, EOFError):
         print("\n  Partida interrumpida.")
 
-    print_summary(session)
+    resultado(sesion)
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    exit_code = main()
+    try:
+        input("\nPresiona Enter para salir...")
+    except (EOFError, KeyboardInterrupt):
+        pass
+    sys.exit(exit_code)

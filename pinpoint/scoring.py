@@ -4,12 +4,13 @@ from __future__ import annotations
 from pinpoint.config import NUM_CLUES
 
 
-def points_for(clues_used: int, num_clues: int = NUM_CLUES) -> int:
-    """Pista 1 -> num_clues puntos ... pista num_clues -> 1 punto."""
-    if not 1 <= clues_used <= num_clues:
-        raise ValueError(f"clues_used debe estar entre 1 y {num_clues}, se recibió {clues_used}")
-    return num_clues - clues_used + 1
+def points_for(pistas_usadas: int, pistas: int = NUM_CLUES) -> int:
+    #Calcula los puntos obtenidos
+    if not 1 <= pistas_usadas <= pistas:
+        raise ValueError(f"pistas_usadas debe estar entre 1 y {pistas}, se recibió {pistas_usadas}")
+    return pistas - pistas_usadas + 1
 
 
-def max_points(rounds: int, num_clues: int = NUM_CLUES) -> int:
-    return rounds * num_clues
+def max_points(rondas: int, pistas: int = NUM_CLUES) -> int:
+    #Calcula el puntaje máximo posible
+    return rondas * pistas

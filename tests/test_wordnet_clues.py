@@ -1,10 +1,11 @@
 import pytest
+from nltk.corpus import wordnet as wn
 
 from pinpoint.bank import load_categories
 from pinpoint.config import FAR_HYPERNYM_MAX_LEVEL, FAR_HYPERNYM_MIN_LEVEL, NUM_CLUES
 from pinpoint.language import display_answer, lemmas_in
 from pinpoint.matcher import leaks_answer
-from pinpoint.models import InsufficientCluesError, Lang, Relation
+from pinpoint.models import Category, InsufficientCluesError, Lang, Relation
 from pinpoint.normalizer import normalize
 from pinpoint.wordnet_clues import (
     _looks_untranslated,
@@ -15,6 +16,26 @@ from pinpoint.wordnet_clues import (
 
 GENERAL = {Relation.HYPERNYM_FAR, Relation.HYPERNYM}
 BANK = load_categories()
+# Synsets fuera del banco (sin curaduría): el generador debe funcionar también sin 'exclude'.
+EXTRA = [Category(s) for s in ("fish.n.01", "fruit.n.01", "vegetable.n.01", "insect.n.01", "truck.n.01")]
+CASES = BANK + EXTRA
+CASE_IDS = [c.synset_id for c in CASES]
+# Generalidad de cada relación: una pista nunca es más general que la anterior.
+RANK = {
+    Relation.HYPERNYM_FAR: 0,
+    Relation.HYPERNYM: 1,
+    Relation.SIBLING: 2,
+    Relation.HYPONYM: 2,
+    Relation.SYNONYM: 3,
+}
+
+
+def _up(s):
+    return s.hypernyms() + s.instance_hypernyms()
+
+
+def _down(s):
+    return s.hyponyms() + s.instance_hyponyms()
 
 
 # ---------- Candidatos (independientes del idioma) ----------
@@ -77,6 +98,15 @@ def test_generation_is_deterministic():
     assert generate_clues("horse.n.01", Lang.EN, "horse") == generate_clues("horse.n.01", Lang.EN, "horse")
 
 
+def test_exclude_accepts_words():
+    """Una palabra en 'exclude' descarta esa forma; el synset puede aportar otra ('haya')."""
+    base = generate_clues("tree.n.01", Lang.ES, "árbol")
+    assert "fagus" in [c.text for c in base]
+    clues = generate_clues("tree.n.01", Lang.ES, "árbol", exclude=frozenset({"Fagus"}))
+    assert "fagus" not in [c.text for c in clues]
+    assert "haya" in [c.text for c in clues]
+
+
 def test_insufficient_clues_raises():
     pools = candidate_pools("dog.n.01")
     everything = frozenset(r.synset_id for pool in pools.values() for r in pool)
@@ -85,9 +115,40 @@ def test_insufficient_clues_raises():
 
 
 @pytest.mark.parametrize("lang", [Lang.EN, Lang.ES])
-@pytest.mark.parametrize("category", BANK, ids=[c.synset_id for c in BANK])
+@pytest.mark.parametrize("category", CASES, ids=CASE_IDS)
+def test_clues_follow_wordnet_structure(category, lang):
+    """Cada pista cumple su relación en WordNet y el orden va de general a específico.
+
+    No se compara min_depth(): con herencia múltiple un ancestro puede ser más
+    profundo que el objetivo ('fruit' vs 'apple'). Se verifica la relación real.
+    """
+    target = wn.synset(category.synset_id)
+    parents = {s.name() for s in _up(target)}
+    ancestors = {s.name() for s in target.closure(_up)}
+    descendants = {s.name() for s in target.closure(_down)}
+    siblings = {s.name() for p in _up(target) for s in _down(p)} - {target.name()}
+
+    answer = display_answer(category, lang)
+    clues = generate_clues(category.synset_id, lang, answer, exclude=category.exclude)
+
+    for clue in clues:
+        holds = {
+            Relation.HYPERNYM_FAR: clue.synset_id in ancestors - parents,
+            Relation.HYPERNYM: clue.synset_id in parents,
+            Relation.HYPONYM: clue.synset_id in descendants,
+            Relation.SIBLING: clue.synset_id in siblings,
+            # Se compara con el id del banco: 'pig.n.01' es alias de 'hog.n.03' en WordNet.
+            Relation.SYNONYM: clue.synset_id == category.synset_id,
+        }[clue.relation]
+        assert holds, clue
+    ranks = [RANK[c.relation] for c in clues]
+    assert ranks == sorted(ranks), [c.relation.value for c in clues]
+
+
+@pytest.mark.parametrize("lang", [Lang.EN, Lang.ES])
+@pytest.mark.parametrize("category", CASES, ids=CASE_IDS)
 def test_every_bank_category_yields_valid_clues(category, lang):
-    """Contrato de todo el banco: 5 pistas, ordenadas, sin fugas y sin repetir raíces."""
+    """Contrato de todo el banco (y de EXTRA): 5 pistas, ordenadas, sin fugas y sin repetir raíces."""
     answer = display_answer(category, lang)
     clues = generate_clues(category.synset_id, lang, answer, exclude=category.exclude)
     answers = [answer, *lemmas_in(category.synset_id, lang)]
@@ -96,7 +157,8 @@ def test_every_bank_category_yields_valid_clues(category, lang):
     assert [c.order for c in clues] == list(range(1, NUM_CLUES + 1))
     assert clues[0].relation in GENERAL | {Relation.SIBLING}
     assert len({c.text.lower() for c in clues}) == NUM_CLUES
-    assert all(c.synset_id not in category.exclude for c in clues)
+    excluded = {e.lower() for e in category.exclude}
+    assert all(c.synset_id not in excluded and c.text.lower() not in excluded for c in clues)
 
     for clue in clues:
         if clue.relation is not Relation.SYNONYM:

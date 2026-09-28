@@ -33,7 +33,8 @@ class Category:
 
     display: forma preferida de la respuesta por idioma (clave = código OMW).
              Si falta un idioma, se usa el primer lema de WordNet en ese idioma.
-    exclude: synsets que nunca deben usarse como pista (curaduría manual de ruido de OMW).
+    exclude: synsets ('fox.n.01') o palabras ('fagus') que nunca deben usarse como pista
+             (curaduría manual de ruido de OMW). Las palabras se comparan sin mayúsculas.
     """
 
     synset_id: str

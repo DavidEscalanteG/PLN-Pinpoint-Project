@@ -126,6 +126,8 @@ pinpoint-wordnet/
 ├── cli.py                    # interfaz de consola
 ├── setup_nltk.py             # descarga de recursos NLTK
 ├── data/categories.json      # banco de categorías (synset, display, exclude)
+├── notebook/
+│   └── pinpoint.ipynb        # notebook para su funcionamiento en colab
 ├── pinpoint/
 │   ├── models.py             # contratos de datos y excepciones
 │   ├── config.py             # constantes: plan de pistas, puntuación, tolerancias
@@ -140,7 +142,7 @@ pinpoint-wordnet/
 └── tests/                    # pytest
 ```
 
-`game.GameSession` no hace entrada ni salida. La CLI, un notebook o una web la usan de la misma forma:
+`game.GameSession` no hace entrada ni salida. La CLI y el notebook la usan de la misma forma:
 
 ```python
 from pinpoint import GameSession, Lang
@@ -149,6 +151,97 @@ session = GameSession(Lang.ES, rounds=3, seed=42)
 session.new_round()
 print(session.current_clue().text)
 result = session.guess("perro")   # GuessResult(correct, clues_used, finished, points, revealed_answer)
+```
+### Ejemplo de ejecución en español
+
+Una partida de 3 rondas utilizando `seed 40` puede producir el siguiente resultado:
+
+```text
+PINPOINT WORDNET
+Pistas en: Español  |  Responde en: Español
+5 pistas por ronda, de la más general a la más específica.
+Puntos: A menor número de pistas usadas mayor puntaje, pista 1 = 5 pts ... pista 5 = 1 pt.
+Comandos: ':pasar' (siguiente pista), ':salir' (terminar).
+
+=== Ronda 1 de 3 ===
+
+Pista 1/5: NAVE [hiperónimo lejano]
+
+Tu respuesta > barco
+✘ 'barco' no es correcto. Revelando la siguiente pista...
+
+Pista 2/5: HELICÓPTERO [co-hipónimo]
+
+Tu respuesta > avion
+✔ ¡CORRECTO! La respuesta era 'avión'.
+Pistas usadas: 2/5 → +4 pts
+
+Resumen de la ronda:
+  1. nave          hiperónimo lejano  (craft.n.02)
+  2. helicóptero   co-hipónimo        (helicopter.n.01)
+  3. caza          hipónimo            (fighter.n.02)
+  4. monoplano     hipónimo            (monoplane.n.01)
+  5. aeroplano     sinónimo            (airplane.n.01)
+
+=== Ronda 2 de 3 ===
+
+Pista 1/5: HERRAMIENTA [hiperónimo lejano]
+
+Tu respuesta > martillo
+✘ 'martillo' no es correcto. Revelando la siguiente pista...
+
+Pista 2/5: HERRAMIENTA AFILADORA [hiperónimo]
+
+Tu respuesta > :p
+✘ Pista saltada. Revelando la siguiente pista...
+
+Pista 3/5: ABRECARTAS [hipónimo]
+
+Tu respuesta > cuchillo
+✔ ¡CORRECTO! La respuesta era 'cuchillo'.
+Pistas usadas: 3/5 → +3 pts
+
+
+Resumen de la ronda:
+  1. herramienta             hiperónimo lejano  (tool.n.01)
+  2. herramienta afiladora   hiperónimo         (edge_tool.n.01)
+  3. abrecartas              hipónimo           (letter_opener.n.01)
+  4. afeitadora              co-hipónimo        (razor.n.01)
+  5. cincel                  co-hipónimo        (chisel.n.01)
+
+
+=== Ronda 3 de 3 ===
+
+Pista 1/5: ACTIVIDAD [hiperónimo lejano]
+
+Tu respuesta > deporte
+✔ ¡CORRECTO! La respuesta era 'deporte'.
+Pistas usadas: 1/5 → +5 pts
+
+Resumen de la ronda:
+  1. actividad          hiperónimo lejano  (activity.n.01)
+  2. diversión          hiperónimo         (diversion.n.01)
+  3. carrera            hipónimo           (racing.n.01)
+  4. tiro con arco       hipónimo           (archery.n.01)
+  5. juego atlético     hipónimo           (athletic_game.n.01)
+
+
+================================
+RESUMEN DE LA PARTIDA
+================================
+Ronda 1: ✔ acertada  (2/5 pistas, +4 pts)
+Ronda 2: ✔ acertada  (3/5 pistas, +3 pts)
+Ronda 3: ✔ acertada  (1/5 pistas, +5 pts)
+--------------------------------
+Rondas jugadas: 3
+Acertadas: 3
+Puntaje total: 12 / 15
+```
+
+Para ejecutarlo de forma reproducible:
+
+```bash
+python cli.py --lang spa --rounds 3 --seed 40
 ```
 
 ## Equipo

@@ -41,6 +41,7 @@ def pistas_reveladas(sesion: GameSession, relacion: bool) -> None:
     pistas = sesion.revealed_clues()
     if len(pistas) <= 1:
         return
+    print()
     print("  Pistas reveladas hasta ahora:")
     for pista in pistas[:-1]:
         sufijo = f"   [{pista.relation.value}]" if relacion else ""
@@ -60,9 +61,11 @@ def jugar(sesion: GameSession, relacion: bool) -> bool:
     #Juega una ronda
     print(f"\n=== Ronda {sesion.rounds_played + 1} de {sesion.total_rounds} ===")
     while sesion.round_active:
+        print()
         pistas_reveladas(sesion, relacion)
         partida = sesion.current_clue()
         print(formato(partida, relacion))
+        print()
         pistas_restantes = NUM_CLUES - partida.order
         texto = leer(pistas_restantes)
         comando = texto.lower()

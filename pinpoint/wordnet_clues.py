@@ -150,10 +150,15 @@ class _ClueSelector:
         self.answers = [display, *lemmas_in(target, lang)]
         self.pools = candidate_pools(target)
         self.used_synsets: set[str] = {target, *exclude}
+        # 'exclude' admite synset ids ('fox.n.01') y palabras ('fagus'): una palabra mala
+        # puede venir de un synset que sí sirve en otro idioma o con otra forma.
+        self.excluded_forms = {e.lower() for e in exclude}
         self.used_stems: set[str] = set()
         self.far_stems: frozenset[str] = frozenset()
 
     def _acceptable(self, text: str, relation: Relation) -> bool:
+        if text.lower() in self.excluded_forms:
+            return False
         stems = normalize(text, self.lang)
         if not stems:
             return False

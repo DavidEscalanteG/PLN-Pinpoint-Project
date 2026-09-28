@@ -31,13 +31,38 @@ def test_english_inflections_match(a, b):
     assert normalize(a, Lang.EN) == normalize(b, Lang.EN)
 
 
-@pytest.mark.parametrize(("a", "b"), [("perro", "los perros"), ("león", "leones"), ("canción", "canciones")])
+@pytest.mark.parametrize(
+    ("a", "b"),
+    [
+        ("perro", "los perros"),
+        ("león", "leones"),
+        ("canción", "canciones"),
+        ("gato", "gata"),
+        ("médico", "médica"),
+    ],
+)
 def test_spanish_inflections_match(a, b):
     assert normalize(a, Lang.ES) == normalize(b, Lang.ES)
 
 
-def test_multiword_order_independent():
-    assert normalize("helado de crema", Lang.ES) == normalize("crema helado", Lang.ES)
+@pytest.mark.parametrize(
+    ("base", "diminutive"),
+    [("perro", "perrito"), ("perro", "perritos"), ("gato", "gatita"), ("flor", "florecita")],
+)
+def test_spanish_diminutives_match(base, diminutive):
+    assert normalize(base, Lang.ES) == normalize(diminutive, Lang.ES)
+
+
+@pytest.mark.parametrize(
+    ("a", "b"),
+    [
+        ("helado de crema", "crema helado"),
+        ("LOS PERROS DOMÉSTICOS", "perro domestico"),
+        ("¡Máquina de escribir!", "maquina escribir"),
+    ],
+)
+def test_multiword_answers_ignore_order_articles_accents_and_case(a, b):
+    assert normalize(a, Lang.ES) == normalize(b, Lang.ES)
 
 
 def test_only_stopwords_is_not_empty():

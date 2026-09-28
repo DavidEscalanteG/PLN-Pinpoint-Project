@@ -83,9 +83,22 @@ Se aplica el mismo pipeline a la respuesta del jugador y a cada respuesta válid
 3. **Eliminación de stopwords** de NLTK. Así, "el perro" y "a dog" equivalen a "perro" y "dog".
 4. **Normalización morfológica:**
    - **Inglés:** `WordNetLemmatizer` (resuelve irregulares: *geese* → *goose*, *mice* → *mouse*) seguido de `PorterStemmer` (unifica derivaciones).
-   - **Español y francés:** `SnowballStemmer`. NLTK no incluye lematizador para estos idiomas, y el stemming resuelve plurales y flexión (*leones* → *leon*, *perros* → *perr*).
+   - **Español:** reducción acotada de diminutivos frecuentes seguida de `SnowballStemmer`. El stemming resuelve plurales y flexión (*leones* → *leon*, *perros* → *perr*).
+   - **Francés:** `SnowballStemmer`, ya que NLTK no incluye un lematizador para este idioma.
 5. **Comparación como conjuntos de raíces.** Esto soporta respuestas de varias palabras sin importar el orden.
-6. **Tolerancia a un error tipográfico** (distancia de edición ≤ 1) en respuestas de 5 caracteres o más.
+6. **Tolerancia a un error tipográfico** (distancia de edición ≤ 1) en respuestas de 6 caracteres o más.
+
+Ejemplos del pipeline:
+
+| Entrada del jugador | Forma esperada | Resultado |
+|---|---|---|
+| `LOS PERROS DOMÉSTICOS` | `perro domestico` | Correcta: se eliminan artículo, mayúsculas, acento y plural |
+| `gata` | `gato` | Correcta: Snowball unifica la flexión de género |
+| `perrito` | `perro` | Correcta: se reduce un sufijo diminutivo frecuente antes del stemming |
+| `jirrafa` | `jirafa` | Correcta: se tolera una errata en palabras de al menos 6 caracteres |
+| `barco` | `banco` | Incorrecta: no se aplica tolerancia tipográfica a palabras cortas |
+
+Se evaluó usar el modelo `es_core_news_sm` de spaCy como lematizador español. No se integró porque añadiría una dependencia y un modelo externos considerablemente más pesados para la instalación y la demo. Snowball, junto con la reducción acotada de diminutivos y los casos de prueba anteriores, cubre las variantes requeridas manteniendo el proyecto reproducible con NLTK.
 
 **Respuestas válidas:** todos los lemas del synset en el idioma de juego, excepto los sinónimos que ya se mostraron como pista (escribir la pista no cuenta como adivinar).
 

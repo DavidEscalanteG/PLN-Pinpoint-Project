@@ -155,10 +155,10 @@ result = session.guess("perro")   # GuessResult(correct, clues_used, finished, p
 
 | Integrante | Responsabilidad | Archivos |
 |---|---|---|
-| P1 | Generación de pistas con WordNet | `wordnet_clues.py`, `tests/test_wordnet_clues.py` |
-| P2 | Normalización y comparación | `normalizer.py`, `matcher.py`, tests |
-| P3 | Lógica del juego e interfaz | `game.py`, `scoring.py`, `cli.py`, `tests/test_game.py` |
-| P4 | Bilingüe, banco de categorías y documentación | `language.py`, `bank.py`, `data/`, `scripts/`, README |
+| Carlos Manzanero | Generación de pistas con WordNet | `wordnet_clues.py`, `tests/test_wordnet_clues.py` |
+| David Escalante | Normalización y comparación | `normalizer.py`, `matcher.py`, tests |
+| Ivan Perez | Lógica del juego e interfaz | `game.py`, `scoring.py`, `cli.py`, `tests/test_game.py` |
+| Bryan Chale | Bilingüe, banco de categorías y documentación | `language.py`, `bank.py`, `data/`, `scripts/`, README |
 
 ## Limitaciones conocidas
 

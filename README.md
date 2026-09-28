@@ -90,7 +90,8 @@ Se aplica el mismo pipeline a la respuesta del jugador y a cada respuesta válid
    - **Español:** reducción acotada de diminutivos frecuentes seguida de `SnowballStemmer`. El stemming resuelve plurales y flexión (*leones* → *leon*, *perros* → *perr*).
    - **Francés:** `SnowballStemmer`, ya que NLTK no incluye un lematizador para este idioma.
 5. **Comparación como conjuntos de raíces.** Esto soporta respuestas de varias palabras sin importar el orden.
-6. **Tolerancia a un error tipográfico** (distancia de edición ≤ 1) en respuestas de 6 caracteres o más.
+6. **Respaldo morfológico para plurales.** Si el stemmer no reduce una forma, se comparan reglas productivas de número: `oso`/`osos`, `pez`/`peces`, `cheval`/`chevaux` y `cheveu`/`cheveux`. El plural se genera desde la posible forma singular, evitando recortes incorrectos como `tesis` → `tesi`.
+7. **Tolerancia a un error tipográfico** (distancia de edición ≤ 1) en respuestas de 6 caracteres o más.
 
 Ejemplos del pipeline:
 

@@ -11,7 +11,7 @@ Las pistas van de la más general (1) a la más reveladora (5).
 | 2 | equine | équido | Hiperónimo directo | `equine.n.01` |
 | 3 | mount | cabalgadura | Hipónimo | `saddle_horse.n.01` |
 | 4 | mare | poney | Hipónimo | `mare.n.01` / `pony.n.01` |
-| 5 | Equus caballus | equinos | Sinónimo (mismo synset) | `horse.n.01` |
+| 5 | pony | equinos | Hipónimo / Sinónimo (mismo synset) | `pony.n.01` / `horse.n.01` |
 
 ## Árbol — `tree.n.01`
 
@@ -42,4 +42,5 @@ Las pistas van de la más general (1) a la más reveladora (5).
 
   La pista 2 queda como *callejero* (`stray.n.01`, que es hermano de `dog.n.01`).
 - **Sin sinónimo en la pista 5:** *tree* no tiene otro lema en su synset, así que
-  la pista 5 es otro hipónimo (ver `CLUE_PLAN`).
+  la pista 5 es otro hipónimo (ver `CLUE_PLAN`). En *horse* pasa lo mismo por
+  curaduría: el banco excluye *Equus caballus*, y la pista 5 queda como *pony*.

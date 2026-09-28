@@ -7,31 +7,31 @@
         "spa": "perro",
         "fra": "chien"
       },
-      "exclude": [
-        "fox.n.01",
-        "head.n.02"
-      ]
+      "exclude": ["fox.n.01", "head.n.02", "vulpini", "canis.n.01"]
     },
     {
       "synset": "cat.n.01",
       "display": {
         "spa": "gato",
         "fra": "chat"
-      }
+      },
+      "exclude": ["felis silvestris catus", "mico", "mitzli"]
     },
     {
       "synset": "horse.n.01",
       "display": {
         "spa": "caballo",
         "fra": "cheval"
-      }
+      },
+      "exclude": ["equus caballus", "equus ferus caballus"]
     },
     {
       "synset": "cow.n.01",
       "display": {
         "spa": "vaca",
         "fra": "vache"
-      }
+      },
+      "exclude": ["bos taurus", "bos primigenius taurus"]
     },
     {
       "synset": "pig.n.01",
@@ -39,28 +39,32 @@
         "eng": "pig",
         "spa": "cerdo",
         "fra": "cochon"
-      }
+      },
+      "exclude": ["canalla"]
     },
     {
       "synset": "bird.n.01",
       "display": {
         "spa": "pájaro",
         "fra": "oiseau"
-      }
+      },
+      "exclude": ["apodiforme", "archaeopteryx"]
     },
     {
       "synset": "snake.n.01",
       "display": {
         "spa": "serpiente",
         "fra": "serpent"
-      }
+      },
+      "exclude": ["archosauria", "elapidae", "bicha"]
     },
     {
       "synset": "bear.n.01",
       "display": {
         "spa": "oso",
         "fra": "ours"
-      }
+      },
+      "exclude": ["ursidae", "baribal"]
     },
     {
       "synset": "lion.n.01",
@@ -81,28 +85,32 @@
       "display": {
         "spa": "abeja",
         "fra": "abeille"
-      }
+      },
+      "exclude": ["anthophila", "himenóptero"]
     },
     {
       "synset": "whale.n.02",
       "display": {
         "spa": "ballena",
         "fra": "baleine"
-      }
+      },
+      "exclude": ["odontoceto", "zífido"]
     },
     {
       "synset": "frog.n.01",
       "display": {
         "spa": "rana",
         "fra": "grenouille"
-      }
+      },
+      "exclude": ["leptodáctilo", "amphibia"]
     },
     {
       "synset": "shark.n.01",
       "display": {
         "spa": "tiburón",
         "fra": "requin"
-      }
+      },
+      "exclude": ["selachimorpha", "seláceo"]
     },
     {
       "synset": "tree.n.01",
@@ -116,14 +124,16 @@
       "display": {
         "spa": "flor",
         "fra": "fleur"
-      }
+      },
+      "exclude": ["paeoniaceae", "angiosperma"]
     },
     {
       "synset": "apple.n.01",
       "display": {
         "spa": "manzana",
         "fra": "pomme"
-      }
+      },
+      "exclude": ["camuesa"]
     },
     {
       "synset": "banana.n.02",
@@ -137,21 +147,24 @@
       "display": {
         "spa": "naranja",
         "fra": "orange"
-      }
+      },
+      "exclude": ["acimboga", "citrange"]
     },
     {
       "synset": "bread.n.01",
       "display": {
         "spa": "pan",
         "fra": "pain"
-      }
+      },
+      "exclude": ["brindis"]
     },
     {
       "synset": "cheese.n.01",
       "display": {
         "spa": "queso",
         "fra": "fromage"
-      }
+      },
+      "exclude": ["cottage"]
     },
     {
       "synset": "wine.n.01",
@@ -193,7 +206,8 @@
       "display": {
         "spa": "carro",
         "fra": "voiture"
-      }
+      },
+      "exclude": ["taxímetro"]
     },
     {
       "synset": "bicycle.n.01",
@@ -207,7 +221,8 @@
       "display": {
         "spa": "barco",
         "fra": "bateau"
-      }
+      },
+      "exclude": ["vaso"]
     },
     {
       "synset": "airplane.n.01",
@@ -242,7 +257,8 @@
       "display": {
         "spa": "hospital",
         "fra": "hôpital"
-      }
+      },
+      "exclude": ["inclusa"]
     },
     {
       "synset": "chair.n.01",
@@ -284,14 +300,16 @@
       "display": {
         "spa": "zapato",
         "fra": "chaussure"
-      }
+      },
+      "exclude": ["patoso"]
     },
     {
       "synset": "shirt.n.01",
       "display": {
         "spa": "camisa",
         "fra": "chemise"
-      }
+      },
+      "exclude": ["cilicio"]
     },
     {
       "synset": "guitar.n.01",
@@ -403,6 +421,29 @@
       "display": {
         "spa": "deporte",
         "fra": "sport"
+      }
+    },
+    {
+      "synset": "door.n.01",
+      "display": {
+        "spa": "puerta",
+        "fra": "porte"
+      },
+      "exclude": ["revolver", "seguro"]
+    },
+    {
+      "synset": "window.n.01",
+      "display": {
+        "spa": "ventana",
+        "fra": "fenêtre"
+      },
+      "exclude": ["transparente", "armadura"]
+    },
+    {
+      "synset": "sun.n.01",
+      "display": {
+        "spa": "sol",
+        "fra": "soleil"
       }
     }
   ]

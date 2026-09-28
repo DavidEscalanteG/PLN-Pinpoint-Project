@@ -164,13 +164,14 @@ Puntos: A menor número de pistas usadas mayor puntaje, pista 1 = 5 pts ... pist
 Comandos: ':pasar' (siguiente pista), ':salir' (terminar).
 
 === Ronda 1 de 3 ===
-Pista 1/5: NAVE
-[hiperónimo lejano]
+
+Pista 1/5: NAVE [hiperónimo lejano]
+
 Tu respuesta > barco
 ✘ 'barco' no es correcto. Revelando la siguiente pista...
 
-Pista 2/5: HELICÓPTERO
-[co-hipónimo]
+Pista 2/5: HELICÓPTERO [co-hipónimo]
+
 Tu respuesta > avion
 ✔ ¡CORRECTO! La respuesta era 'avión'.
 Pistas usadas: 2/5 → +4 pts
@@ -183,18 +184,19 @@ Resumen de la ronda:
   5. aeroplano     sinónimo            (airplane.n.01)
 
 === Ronda 2 de 3 ===
-Pista 1/5: HERRAMIENTA
-[hiperónimo lejano]
+
+Pista 1/5: HERRAMIENTA [hiperónimo lejano]
+
 Tu respuesta > martillo
 ✘ 'martillo' no es correcto. Revelando la siguiente pista...
 
-Pista 2/5: HERRAMIENTA AFILADORA
-[hiperónimo]
+Pista 2/5: HERRAMIENTA AFILADORA [hiperónimo]
+
 Tu respuesta > :p
 ✘ Pista saltada. Revelando la siguiente pista...
 
-Pista 3/5: ABRECARTAS
-[hipónimo]
+Pista 3/5: ABRECARTAS [hipónimo]
+
 Tu respuesta > cuchillo
 ✔ ¡CORRECTO! La respuesta era 'cuchillo'.
 Pistas usadas: 3/5 → +3 pts
@@ -209,8 +211,9 @@ Resumen de la ronda:
 
 
 === Ronda 3 de 3 ===
-Pista 1/5: ACTIVIDAD
-[hiperónimo lejano]
+
+Pista 1/5: ACTIVIDAD [hiperónimo lejano]
+
 Tu respuesta > deporte
 ✔ ¡CORRECTO! La respuesta era 'deporte'.
 Pistas usadas: 1/5 → +5 pts
@@ -240,8 +243,6 @@ Para ejecutarlo de forma reproducible:
 ```bash
 python cli.py --lang spa --rounds 3 --seed 40
 ```
-
-Este ejemplo también permite observar que las respuestas se normalizan: `avion` es aceptada para `avión`, aunque el jugador no escriba el acento.
 
 ## Equipo
 

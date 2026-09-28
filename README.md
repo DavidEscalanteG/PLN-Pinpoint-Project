@@ -168,11 +168,13 @@ Pista 1/5: NAVE
 [hiperónimo lejano]
 Tu respuesta > barco
 ✘ 'barco' no es correcto. Revelando la siguiente pista...
+
 Pista 2/5: HELICÓPTERO
 [co-hipónimo]
 Tu respuesta > avion
 ✔ ¡CORRECTO! La respuesta era 'avión'.
 Pistas usadas: 2/5 → +4 pts
+
 Resumen de la ronda:
   1. nave          hiperónimo lejano  (craft.n.02)
   2. helicóptero   co-hipónimo        (helicopter.n.01)
@@ -185,15 +187,18 @@ Pista 1/5: HERRAMIENTA
 [hiperónimo lejano]
 Tu respuesta > martillo
 ✘ 'martillo' no es correcto. Revelando la siguiente pista...
+
 Pista 2/5: HERRAMIENTA AFILADORA
 [hiperónimo]
 Tu respuesta > :p
 ✘ Pista saltada. Revelando la siguiente pista...
+
 Pista 3/5: ABRECARTAS
 [hipónimo]
 Tu respuesta > cuchillo
 ✔ ¡CORRECTO! La respuesta era 'cuchillo'.
 Pistas usadas: 3/5 → +3 pts
+
 
 Resumen de la ronda:
   1. herramienta             hiperónimo lejano  (tool.n.01)
@@ -209,6 +214,7 @@ Pista 1/5: ACTIVIDAD
 Tu respuesta > deporte
 ✔ ¡CORRECTO! La respuesta era 'deporte'.
 Pistas usadas: 1/5 → +5 pts
+
 Resumen de la ronda:
   1. actividad          hiperónimo lejano  (activity.n.01)
   2. diversión          hiperónimo         (diversion.n.01)

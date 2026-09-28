@@ -44,7 +44,7 @@ NLTK_LANG_NAME: dict[Lang, str] = {
 
 # Tolerancia a errores tipográficos (distancia de edición sobre la forma normalizada).
 TYPO_TOLERANCE = 1
-TYPO_MIN_LENGTH = 5  # no se aplica a palabras cortas (evita aceptar "car" por "cat")
+TYPO_MIN_LENGTH = 6  # reduce falsos positivos en palabras cortas (p. ej. "barco"/"banco")
 
 # Longitud mínima de un token de la respuesta para detectarlo como subcadena en una pista.
 LEAK_MIN_SUBSTRING = 3

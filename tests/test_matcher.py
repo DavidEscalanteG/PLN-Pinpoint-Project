@@ -4,7 +4,7 @@ from pinpoint.matcher import is_correct, leaks_answer
 from pinpoint.models import Lang
 
 
-@pytest.mark.parametrize("guess", ["perro", "Perros", "el perro", "PERRÓ", "perrro"])
+@pytest.mark.parametrize("guess", ["perro", "Perros", "el perro", "PERRÓ", "perrito"])
 def test_spanish_correct(guess):
     assert is_correct(guess, ["perro", "can"], Lang.ES)
 
@@ -20,6 +20,19 @@ def test_english_multiword():
 
 def test_short_words_have_no_typo_tolerance():
     assert not is_correct("car", ["cat"], Lang.EN)
+
+
+@pytest.mark.parametrize(("guess", "answer"), [("barco", "banco"), ("perico", "perro")])
+def test_typo_tolerance_does_not_accept_different_short_words(guess, answer):
+    assert not is_correct(guess, [answer], Lang.ES)
+
+
+def test_long_answer_allows_one_typo():
+    assert is_correct("jirrafa", ["jirafa"], Lang.ES)
+
+
+def test_spanish_multiword_answer():
+    assert is_correct("LOS PERROS DOMÉSTICOS", ["perro domestico"], Lang.ES)
 
 
 @pytest.mark.parametrize("clue", ["hunting dog", "hotdog", "dogs"])

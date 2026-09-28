@@ -6,7 +6,8 @@ Pipeline (idéntico para respuesta esperada y respuesta del jugador):
     3. Eliminación de stopwords (artículos, preposiciones: "el perro", "a dog").
     4. Normalización morfológica por idioma:
        - EN: WordNetLemmatizer (irregulares: geese -> goose) + PorterStemmer.
-       - ES/FR: SnowballStemmer (NLTK no incluye lematizador para estos idiomas).
+       - ES: reducción acotada de diminutivos + SnowballStemmer.
+       - FR: SnowballStemmer (NLTK no incluye lematizador para estos idiomas).
 El resultado es un conjunto de raíces; comparar conjuntos hace que el orden de
 las palabras no importe en respuestas multipalabra.
 """
@@ -30,6 +31,15 @@ _PUNCT_TABLE = str.maketrans("", "", string.punctuation + "¿¡«»“”‘’"
 
 _lemmatizer = WordNetLemmatizer()
 _porter = PorterStemmer()
+
+# Snowball resuelve flexión de género y número, pero conserva los sufijos
+# diminutivos. Se eliminan solo formas productivas frecuentes y siempre que quede
+# una base de al menos tres caracteres (perrito -> perr, florecita -> flor).
+_SPANISH_DIMINUTIVE_SUFFIXES = (
+    "ecitos", "ecitas", "ecito", "ecita",
+    "citos", "citas", "cito", "cita",
+    "itos", "itas", "ito", "ita",
+)
 
 
 def strip_accents(text: str) -> str:
@@ -68,7 +78,17 @@ def _snowball(lang: Lang) -> SnowballStemmer:
 def normalize_token(token: str, lang: Lang) -> str:
     if lang is Lang.EN:
         return _porter.stem(_lemmatizer.lemmatize(token, pos="n"))
+    if lang is Lang.ES:
+        token = _strip_spanish_diminutive(token)
     return _snowball(lang).stem(token)
+
+
+def _strip_spanish_diminutive(token: str) -> str:
+    """Reduce diminutivos españoles comunes antes de aplicar Snowball."""
+    for suffix in _SPANISH_DIMINUTIVE_SUFFIXES:
+        if token.endswith(suffix) and len(token) - len(suffix) >= 3:
+            return token[: -len(suffix)]
+    return token
 
 
 def content_tokens(text: str, lang: Lang) -> list[str]:

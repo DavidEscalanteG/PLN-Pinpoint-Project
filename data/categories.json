@@ -23,7 +23,7 @@
         "spa": "caballo",
         "fra": "cheval"
       },
-      "exclude": ["equus caballus", "equus ferus caballus"]
+      "exclude": ["equus caballus", "equus ferus caballus", "equinos"]
     },
     {
       "synset": "cow.n.01",
@@ -117,7 +117,8 @@
       "display": {
         "spa": "árbol",
         "fra": "arbre"
-      }
+      },
+      "exclude": ["fagus"]
     },
     {
       "synset": "flower.n.01",
@@ -207,7 +208,7 @@
         "spa": "carro",
         "fra": "voiture"
       },
-      "exclude": ["taxímetro"]
+      "exclude": ["taxímetro", "container.n.01", "medio", "ceta"]
     },
     {
       "synset": "bicycle.n.01",

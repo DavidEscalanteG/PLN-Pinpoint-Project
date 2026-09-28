@@ -1,7 +1,7 @@
 import pytest
 
 from pinpoint.models import Lang
-from pinpoint.normalizer import clean, normalize, strip_accents
+from pinpoint.normalizer import clean, matches_expected_form, normalize, strip_accents
 
 
 def test_strip_accents():
@@ -67,3 +67,52 @@ def test_multiword_answers_ignore_order_articles_accents_and_case(a, b):
 
 def test_only_stopwords_is_not_empty():
     assert normalize("the", Lang.EN)
+
+
+@pytest.mark.parametrize(
+    ("singular", "plural"),
+    [("oso", "osos"), ("ave", "aves"), ("mes", "meses"), ("pez", "peces"), ("luz", "luces")],
+)
+def test_spanish_plural_equivalence_covers_short_and_orthographic_forms(singular, plural):
+    assert matches_expected_form(plural, singular, Lang.ES)
+
+
+@pytest.mark.parametrize(
+    ("valid", "invalid"),
+    [("tesis", "tesi"), ("tesis", "tesises"), ("crisis", "crisi"), ("virus", "viruses")],
+)
+def test_spanish_invariant_words_reject_invented_inflections(valid, invalid):
+    assert not matches_expected_form(invalid, valid, Lang.ES)
+
+
+@pytest.mark.parametrize(
+    ("singular", "plural"),
+    [
+        ("ours", "ours"),
+        ("chat", "chats"),
+        ("cheval", "chevaux"),
+        ("oiseau", "oiseaux"),
+        ("animal", "animaux"),
+        ("cheveu", "cheveux"),
+    ],
+)
+def test_french_plural_equivalence(singular, plural):
+    assert matches_expected_form(plural, singular, Lang.FR)
+
+
+@pytest.mark.parametrize(
+    ("singular", "valid_plural", "invalid_plural"),
+    [("bleu", "bleus", "bleux"), ("pneu", "pneus", "pneux"), ("bal", "bals", "baux")],
+)
+def test_french_plural_exceptions(singular, valid_plural, invalid_plural):
+    assert matches_expected_form(valid_plural, singular, Lang.FR)
+    assert not matches_expected_form(invalid_plural, singular, Lang.FR)
+
+
+@pytest.mark.parametrize(
+    ("singular", "plural"),
+    [("bear", "bears"), ("city", "cities"), ("knife", "knives"), ("mouse", "mice"),
+     ("goose", "geese"), ("child", "children")],
+)
+def test_english_plural_equivalence(singular, plural):
+    assert matches_expected_form(plural, singular, Lang.EN)

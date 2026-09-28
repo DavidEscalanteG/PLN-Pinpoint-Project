@@ -8,6 +8,7 @@ from pinpoint.models import Category, CategoryBankError, Lang, PinpointError, Re
 
 DOG = Category("dog.n.01", {"spa": "perro"})
 CAT = Category("cat.n.01", {"spa": "gato"})
+BEAR = Category("bear.n.01", {"spa": "oso"})
 
 
 def test_build_round_excludes_shown_synonyms_from_answers():
@@ -24,6 +25,14 @@ def test_correct_on_first_clue_gives_max_points():
     assert result.correct and result.finished
     assert result.clues_used == 1 and result.points == 5
     assert session.is_over
+
+
+def test_short_spanish_plural_is_accepted_in_a_real_round():
+    session = GameSession(Lang.ES, rounds=1, categories=[BEAR])
+    session.new_round()
+    result = session.guess("Osos")
+    assert result.correct and result.finished
+    assert result.revealed_answer == "oso"
 
 
 def test_wrong_answers_reveal_all_clues_then_answer():

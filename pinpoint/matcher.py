@@ -7,7 +7,7 @@ from nltk.metrics.distance import edit_distance
 
 from pinpoint.config import LEAK_MIN_SUBSTRING, TYPO_MIN_LENGTH, TYPO_TOLERANCE
 from pinpoint.models import Lang
-from pinpoint.normalizer import clean, content_tokens, normalize
+from pinpoint.normalizer import clean, content_tokens, matches_expected_form, normalize
 
 
 def is_correct(guess: str, answers: Iterable[str], lang: Lang) -> bool:
@@ -22,7 +22,7 @@ def is_correct(guess: str, answers: Iterable[str], lang: Lang) -> bool:
     guess_surface = _surface(guess, lang)
 
     for answer in answers:
-        if normalize(answer, lang) == guess_norm:
+        if matches_expected_form(guess, answer, lang):
             return True
         answer_surface = _surface(answer, lang)
         if (

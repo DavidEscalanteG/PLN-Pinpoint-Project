@@ -10,6 +10,10 @@ Pipeline (idéntico para respuesta esperada y respuesta del jugador):
        - FR: SnowballStemmer (NLTK no incluye lematizador para estos idiomas).
 El resultado es un conjunto de raíces; comparar conjuntos hace que el orden de
 las palabras no importe en respuestas multipalabra.
+
+Cuando el stemmer no reduce un plural corto o irregular,
+matches_expected_form() compara los tokens por pares y valida reglas productivas
+de número para español y francés.
 """
 from __future__ import annotations
 
@@ -40,6 +44,17 @@ _SPANISH_DIMINUTIVE_SUFFIXES = (
     "citos", "citas", "cito", "cita",
     "itos", "itas", "ito", "ita",
 )
+
+_SPANISH_INVARIANT_PLURALS = frozenset({
+    "tesis", "crisis", "analisis", "sintesis", "dosis", "virus",
+    "lunes", "martes", "miercoles", "jueves", "viernes", "paraguas",
+})
+
+_FRENCH_AL_TAKES_S = frozenset({
+    "bal", "carnaval", "chacal", "festival", "recital", "regal",
+})
+_FRENCH_EU_TAKES_S = frozenset({"bleu", "emeu", "pneu"})
+_FRENCH_AU_TAKES_S = frozenset({"landau", "sarrau"})
 
 
 def strip_accents(text: str) -> str:
@@ -101,6 +116,74 @@ def content_tokens(text: str, lang: Lang) -> list[str]:
 def normalize(text: str, lang: Lang) -> frozenset[str]:
     """Forma canónica comparable: conjunto de lemas/raíces de las palabras de contenido."""
     return frozenset(normalize_token(t, lang) for t in content_tokens(text, lang))
+
+
+def matches_expected_form(candidate: str, expected: str, lang: Lang) -> bool:
+    """Compara una respuesta con la forma esperada, incluyendo plurales difíciles.
+
+    El emparejamiento no depende del orden. La comparación es deliberadamente
+    direccional: genera plurales solo desde la respuesta válida conocida, nunca
+    intenta obtener un singular recortando lo escrito por el jugador. Así,
+    ``osos`` coincide con ``oso`` sin aceptar ``tesi`` como ``tesis``.
+    """
+    candidate_tokens = content_tokens(candidate, lang)
+    expected_tokens = content_tokens(expected, lang)
+    if len(candidate_tokens) != len(expected_tokens):
+        return False
+    return _match_unordered(candidate_tokens, expected_tokens, lang)
+
+
+def _match_unordered(left: list[str], right: list[str], lang: Lang) -> bool:
+    """Busca un emparejamiento uno a uno entre tokens equivalentes."""
+    if not left:
+        return not right
+    first, rest = left[0], left[1:]
+    for index, candidate in enumerate(right):
+        if _tokens_equivalent(first, candidate, lang) and _match_unordered(
+            rest, right[:index] + right[index + 1 :], lang
+        ):
+            return True
+    return False
+
+
+def _tokens_equivalent(candidate: str, expected: str, lang: Lang) -> bool:
+    if lang is Lang.ES and expected in _SPANISH_INVARIANT_PLURALS:
+        return candidate == expected
+    if normalize_token(candidate, lang) == normalize_token(expected, lang):
+        return True
+    if lang is Lang.ES:
+        return candidate in _spanish_plural_forms(expected)
+    if lang is Lang.FR:
+        return candidate in _french_plural_forms(expected)
+    return False
+
+
+def _spanish_plural_forms(singular: str) -> frozenset[str]:
+    """Plurales productivos del español para nombres ya limpios y sin acentos."""
+    if singular in _SPANISH_INVARIANT_PLURALS:
+        plural = singular
+    elif singular.endswith("z"):
+        plural = singular[:-1] + "ces"
+    elif singular.endswith(("a", "e", "i", "o", "u")):
+        plural = singular + "s"
+    else:
+        plural = singular + "es"
+    return frozenset((singular, plural))
+
+
+def _french_plural_forms(singular: str) -> frozenset[str]:
+    """Plurales franceses regulares, incluidos ``-al`` y ``-au/-eau/-eu``."""
+    if singular.endswith(("s", "x", "z")):
+        plural = singular
+    elif singular.endswith("al") and singular not in _FRENCH_AL_TAKES_S:
+        plural = singular[:-2] + "aux"
+    elif singular.endswith("eu") and singular not in _FRENCH_EU_TAKES_S:
+        plural = singular + "x"
+    elif singular.endswith(("au", "eau")) and singular not in _FRENCH_AU_TAKES_S:
+        plural = singular + "x"
+    else:
+        plural = singular + "s"
+    return frozenset((singular, plural))
 
 
 def canonical_key(text: str, lang: Lang) -> str:

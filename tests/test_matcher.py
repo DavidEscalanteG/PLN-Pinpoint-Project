@@ -35,6 +35,15 @@ def test_spanish_multiword_answer():
     assert is_correct("LOS PERROS DOMÉSTICOS", ["perro domestico"], Lang.ES)
 
 
+@pytest.mark.parametrize("guess", ["osos", "OSOS", "los osos"])
+def test_short_spanish_plural_is_accepted(guess):
+    assert is_correct(guess, ["oso"], Lang.ES)
+
+
+def test_french_plural_missed_by_snowball_is_accepted():
+    assert is_correct("cheveux", ["cheveu"], Lang.FR)
+
+
 @pytest.mark.parametrize("clue", ["hunting dog", "hotdog", "dogs"])
 def test_leaks_detected(clue):
     assert leaks_answer(clue, ["dog"], Lang.EN)
